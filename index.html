@@ -1,68 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Spare Parts – Global HVAC Solutions</title>
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#000">
-  
-  <!-- EmailJS SDK -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  
-  <style>
-    body { font-family: system-ui, sans-serif; margin:0; padding:1rem; background:#f8f9fa; }
-    header { text-align:center; padding:2rem; background:#003366; color:white; }
-    .parts { display:grid; gap:1rem; margin:2rem 0; }
-    .part { border:1px solid #ddd; padding:1rem; border-radius:8px; background:white; }
-    form { max-width:400px; margin:2rem auto; }
-    input, textarea, button { display:block; width:100%; margin:0.5rem 0; padding:0.8rem; box-sizing:border-box; font-size:1rem; }
-    button { background:#003366; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; }
-    button:hover { background:#005599; }
-    h2, h3 { margin-top:1.5rem; }
-    #form-message { margin-top:1rem; padding:1rem; border-radius:6px; display:none; }
-    .success { background:#d4edda; color:#155724; }
-    .error   { background:#f8d7da; color:#721c24; }
-  </style>
-</head>
-<body>
-
-<header>
-  <h1>Spare Parts</h1>
-  <p>Global HVAC Solutions LLC</p>
-</header>
-
-<section>
-  <h2>Contact Us</h2>
-  <p>Jeff Lee<br>Phone: (409) 749-0650<br>Email: <a href="mailto:jlee@globalhvacsolutions.com">jlee@globalhvacsolutions.com</a></p>
-</section>
-
-<section class="parts">
-  <div class="part">
-    <h3>Widget X-300</h3>
-    <p>$24.99 • In stock: 47</p>
-    <button onclick="alert('Added – we\'ll call you!')">Add to Cart</button>
-  </div>
-  <!-- Add more real parts here -->
-</section>
-
-<form id="order-form">
-  <h3>Order Spare Parts</h3>
-  <input type="text"    id="user_name"    placeholder="Your name" required/>
-  <input type="tel"     id="user_phone"   placeholder="Phone (optional)" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"/>
-  <input type="email"   id="user_email"   placeholder="Email" required/>
-  <textarea             id="message"      placeholder="Part numbers, quantities, and any notes..." rows="5" required></textarea>
-  <button type="submit">Send Order</button>
-  <div id="form-message"></div>
-</form>
-
 <script>
-// Replace these with YOUR EmailJS credentials
-const SERVICE_ID    = 'YOUR_SERVICE_ID';     // e.g. service_abc123
-const TEMPLATE_ID   = 'YOUR_TEMPLATE_ID';    // e.g. template_def456
-const PUBLIC_KEY    = 'YOUR_USER_ID';        // e.g. user_xyz78910   (this is the public key / user ID)
+// Replace these with YOUR actual values from EmailJS dashboard
+const SERVICE_ID    = 'YOUR_SERVICE_ID_HERE';      // e.g. service_abc123
+const TEMPLATE_ID   = 'YOUR_TEMPLATE_ID_HERE';     // e.g. template_def456
+const PUBLIC_KEY    = 'YOUR_PUBLIC_KEY_HERE';      // e.g. user_xyz78910abc
 
-emailjs.init(PUBLIC_KEY);
+// Initialize EmailJS
+if (typeof emailjs !== 'undefined') {
+  emailjs.init(PUBLIC_KEY);
+} else {
+  console.error('EmailJS SDK failed to load – check <script src> URL or internet');
+}
 
 document.getElementById('order-form').addEventListener('submit', function(e) {
   e.preventDefault();
@@ -77,21 +24,23 @@ document.getElementById('order-form').addEventListener('submit', function(e) {
     user_phone:  document.getElementById('user_phone').value || 'Not provided',
     user_email:  document.getElementById('user_email').value,
     message:     document.getElementById('message').value,
-    timestamp:   new Date().toLocaleString()
+    timestamp:   new Date().toLocaleString(),
+    to_email:    'jlee@globalhvacsolutions.com'   // Add this if template has {{to_email}}
   };
+
+  console.log('Sending with params:', templateParams); // Debug: see what's sent
 
   emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
     .then(function(response) {
+      console.log('SUCCESS!', response.status, response.text);
       formMessage.className = 'success';
       formMessage.textContent = 'Order sent successfully! Jeff will contact you soon.';
       document.getElementById('order-form').reset();
+      setTimeout(() => { formMessage.style.display = 'none'; }, 8000);
     }, function(error) {
+      console.error('EmailJS failed:', error);
       formMessage.className = 'error';
-      formMessage.textContent = 'Failed to send order. Please try again or call (409) 749-0650.';
-      console.error('EmailJS error:', error);
+      formMessage.innerHTML = 'Failed to send order.<br>Error: ' + (error.text || error.statusText || 'Unknown') + '<br>Please try again or call (409) 749-0650.';
     });
 });
 </script>
-
-</body>
-</html>
