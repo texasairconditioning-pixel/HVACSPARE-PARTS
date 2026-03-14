@@ -1,46 +1,112 @@
-<script>
-// Replace these with YOUR actual values from EmailJS dashboard
-const SERVICE_ID    = 'YOUR_SERVICE_ID_HERE';      // e.g. service_abc123
-const TEMPLATE_ID   = 'YOUR_TEMPLATE_ID_HERE';     // e.g. template_def456
-const PUBLIC_KEY    = 'YOUR_PUBLIC_KEY_HERE';      // e.g. user_xyz78910abc
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spare Parts – Global HVAC Solutions LLC</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin:0; background:#f8f9fa; color:#333; line-height:1.6; }
+    header { background:#003366; color:white; text-align:center; padding:3rem 1rem; }
+    header h1 { margin:0; font-size:2.8rem; }
+    header p { margin:0.5rem 0 0; font-size:1.2rem; opacity:0.9; }
+    .container { max-width:1200px; margin:0 auto; padding:1rem; }
+    h2 { color:#003366; border-bottom:2px solid #003366; padding-bottom:0.5rem; margin:2rem 0 1rem; }
+    .contact { background:white; padding:1.5rem; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); margin-bottom:2rem; text-align:center; }
+    .parts-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem; }
+    .part-card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition:transform 0.2s; }
+    .part-card:hover { transform:translateY(-5px); }
+    .part-img { width:100%; height:180px; object-fit:contain; background:#f0f4f8; padding:1rem; }
+    .part-info { padding:1rem; }
+    .part-title { margin:0; font-size:1.3rem; color:#003366; }
+    .part-price { font-size:1.4rem; font-weight:bold; color:#d32f2f; margin:0.5rem 0; }
+    .part-stock { font-size:0.95rem; color:#388e3c; margin-bottom:1rem; }
+    .part-stock.low { color:#f57c00; }
+    button { background:#003366; color:white; border:none; width:100%; padding:0.9rem; font-size:1rem; font-weight:bold; cursor:pointer; border-radius:0 0 12px 12px; transition:background 0.2s; }
+    button:hover { background:#005599; }
+    form { background:white; padding:2rem; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1); max-width:500px; margin:2rem auto; }
+    input, textarea { width:100%; padding:0.9rem; margin:0.8rem 0; border:1px solid #ddd; border-radius:6px; font-size:1rem; }
+    textarea { height:120px; }
+    .submit-btn { background:#388e3c; font-size:1.1rem; }
+    .submit-btn:hover { background:#2e7d32; }
+  </style>
+</head>
+<body>
 
-// Initialize EmailJS
-if (typeof emailjs !== 'undefined') {
-  emailjs.init(PUBLIC_KEY);
-} else {
-  console.error('EmailJS SDK failed to load – check <script src> URL or internet');
-}
+<header>
+  <h1>Spare Parts</h1>
+  <p>Global HVAC Solutions LLC</p>
+</header>
 
-document.getElementById('order-form').addEventListener('submit', function(e) {
-  e.preventDefault();
+<div class="container">
 
-  const formMessage = document.getElementById('form-message');
-  formMessage.style.display = 'block';
-  formMessage.className = '';
-  formMessage.textContent = 'Sending order...';
+  <section class="contact">
+    <h2>Contact Us</h2>
+    <p><strong>Jeff Lee</strong><br>
+    Phone: (409) 749-0650<br>
+    Email: <a href="mailto:jlee@globalhvacsolutions.com" style="color:#003366;">jlee@globalhvacsolutions.com</a></p>
+  </section>
 
-  const templateParams = {
-    user_name:   document.getElementById('user_name').value,
-    user_phone:  document.getElementById('user_phone').value || 'Not provided',
-    user_email:  document.getElementById('user_email').value,
-    message:     document.getElementById('message').value,
-    timestamp:   new Date().toLocaleString(),
-    to_email:    'jlee@globalhvacsolutions.com'   // Add this if template has {{to_email}}
-  };
+  <section>
+    <h2>Available Spare Parts</h2>
+    <div class="parts-grid">
 
-  console.log('Sending with params:', templateParams); // Debug: see what's sent
+      <div class="part-card">
+        <img src="https://ezplenum.com/cdn/shop/files/trane-mot18948.jpg?v=1724931816&width=950" alt="Blower Motor" class="part-img">
+        <div class="part-info">
+          <h3 class="part-title">Blower Motor 1/3 HP</h3>
+          <p class="part-price">$149.99</p>
+          <p class="part-stock">In stock: 23</p>
+          <button onclick="alert('Added to cart – we\'ll follow up!')">Add to Cart</button>
+        </div>
+      </div>
 
-  emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
-    .then(function(response) {
-      console.log('SUCCESS!', response.status, response.text);
-      formMessage.className = 'success';
-      formMessage.textContent = 'Order sent successfully! Jeff will contact you soon.';
-      document.getElementById('order-form').reset();
-      setTimeout(() => { formMessage.style.display = 'none'; }, 8000);
-    }, function(error) {
-      console.error('EmailJS failed:', error);
-      formMessage.className = 'error';
-      formMessage.innerHTML = 'Failed to send order.<br>Error: ' + (error.text || error.statusText || 'Unknown') + '<br>Please try again or call (409) 749-0650.';
-    });
-});
-</script>
+      <div class="part-card">
+        <img src="https://i.ytimg.com/vi/pHJCUwe8mYs/maxresdefault.jpg" alt="Blower Wheel" class="part-img">
+        <div class="part-info">
+          <h3 class="part-title">Blower Wheel Assembly</h3>
+          <p class="part-price">$89.50</p>
+          <p class="part-stock low">In stock: 8 (Low)</p>
+          <button onclick="alert('Added to cart – we\'ll follow up!')">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="part-card">
+        <img src="https://cdn11.bigcommerce.com/s-8t8wm3ppmz/images/stencil/1280w/products/190214/56278/carrier-hd52az002-condenser-fan-motor__48126.1696903650.jpg" alt="Condenser Fan Motor" class="part-img">
+        <div class="part-info">
+          <h3 class="part-title">Condenser Fan Motor 1/4 HP</h3>
+          <p class="part-price">$119.00</p>
+          <p class="part-stock">In stock: 35</p>
+          <button onclick="alert('Added to cart – we\'ll follow up!')">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="part-card">
+        <img src="https://cdn.partshnc.com/media/magefan_blog/How_to_Replace_a_Dual_Venturi_Motor_in_a_Navien_Water_Heater-PartsHnC_1.png" alt="Venturi Motor" class="part-img">
+        <div class="part-info">
+          <h3 class="part-title">Dual Venturi Motor Kit</h3>
+          <p class="part-price">$199.99</p>
+          <p class="part-stock">In stock: 12</p>
+          <button onclick="alert('Added to cart – we\'ll follow up!')">Add to Cart</button>
+        </div>
+      </div>
+
+      <!-- Add more cards as needed -->
+      <div class="part-card">
+        <div class="part-img" style="display:flex;align-items:center;justify-content:center;font-size:3rem;color:#ccc;">Capacitor</div>
+        <div class="part-info">
+          <h3 class="part-title">Run Capacitor 45+5 MFD</h3>
+          <p class="part-price">$18.75</p>
+          <p class="part-stock">In stock: 120</p>
+          <button onclick="alert('Added to cart – we\'ll follow up!')">Add to Cart</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Your order form can go here – keep as is or integrate EmailJS from previous -->
+
+</div>
+
+</body>
+</html>
