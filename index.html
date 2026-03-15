@@ -1,52 +1,361 @@
-<!-- EmailJS SDK -->
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
-<!-- Request Form -->
-<section style="margin: 3rem auto; max-width: 600px; padding: 0 1rem;">
-  <h2 style="text-align: center; color: #003366;">Request Quote or Order Parts</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Spare Parts – Global HVAC Solutions LLC</title>
   
-  <p style="text-align: center; color: #444; margin-bottom: 2rem;">
-    Enter your details and list the parts you need.<br>
-    Example: "Run Capacitor 45+5 MFD – Qty 5" or "Blower Motor – Qty 1"
-  </p>
+  <!-- EmailJS SDK -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
-  <form id="order-form" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.12);">
-    <div style="margin-bottom: 1.2rem;">
-      <label for="user_name" style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #003366;">Your Name *</label>
-      <input type="text" id="user_name" required placeholder="Jeffery W Lee" style="width: 100%; padding: 0.9rem; border: 1px solid #ccc; border-radius: 6px;">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      background: #f8f9fa;
+      color: #333;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      background: #003366;
+      color: white;
+      text-align: center;
+      padding: 2.5rem 1rem;
+    }
+    header h1 { margin: 0; font-size: 2.8rem; }
+    header p { margin: 0.5rem 0 0; font-size: 1.3rem; opacity: 0.9; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+
+    h2 { color: #003366; border-bottom: 2px solid #003366; padding-bottom: 0.5rem; margin: 2rem 0 1rem; text-align: center; }
+
+    .contact {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .parts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .part-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .part-card:hover { transform: translateY(-5px); }
+
+    .part-img {
+      width: 100%;
+      height: 180px;
+      object-fit: contain;
+      background: #f0f4f8;
+      padding: 1rem;
+    }
+
+    .part-info { padding: 1rem; }
+    .part-title { margin: 0; font-size: 1.3rem; color: #003366; }
+    .part-price { font-size: 1.4rem; font-weight: bold; color: #d32f2f; margin: 0.5rem 0; }
+    .part-stock { font-size: 0.95rem; margin-bottom: 1rem; }
+    .part-stock.low { color: #f57c00; }
+
+    button {
+      background: #003366;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 0 0 12px 12px;
+      min-height: 48px;
+      touch-action: manipulation;
+    }
+    button:hover { background: #005599; }
+
+    /* Cart */
+    #cart-icon {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #003366;
+      color: white;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    #cart-count {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: red;
+      color: white;
+      border-radius: 50%;
+      min-width: 28px;
+      height: 28px;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+    }
+
+    #cart-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    #cart-content {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      .parts-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+      .part-img { height: 160px; }
+      button { font-size: 1.2rem; padding: 1.2rem; }
+      #cart-icon { width: 80px; height: 80px; bottom: 15px; right: 15px; }
+      #cart-content { padding: 1.2rem; border-radius: 0; max-height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Spare Parts</h1>
+  <p>Global HVAC Solutions LLC</p>
+</header>
+
+<div class="container">
+
+  <section class="contact">
+    <h2>Contact Us</h2>
+    <p><strong>Jeff Lee</strong><br>
+    Phone: (409) 749-0650<br>
+    Email: <a href="mailto:jlee@globalhvacsolutions.com" style="color:#003366;">jlee@globalhvacsolutions.com</a></p>
+  </section>
+
+  <section>
+    <h2>Available Spare Parts</h2>
+    <div class="parts-grid">
+
+      <!-- Example parts - replace/add your real ones -->
+      <div class="part-card">
+        <img src="https://ezplenum.com/cdn/shop/files/trane-mot18948.jpg?v=1724931816&width=950" alt="Blower Motor" class="part-img">
+        <div class="part-info">
+          <h3 class="part-title">Blower Motor 1/3 HP</h3>
+          <p class="part-price">$149.99</p>
+          <p class="part-stock">In stock: 23</p>
+          <button onclick="addToCart('Blower Motor 1/3 HP', '$149.99')">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="part-card">
+        <img src="https://i.ytimg.com/vi/pHJCUwe8mYs/maxresdefault.jpg" alt="Blower Wheel" class="part-img">
+        <div class="part-info">
+          <h3 class="part-title">Blower Wheel Assembly</h3>
+          <p class="part-price">$89.50</p>
+          <p class="part-stock low">In stock: 8 (Low)</p>
+          <button onclick="addToCart('Blower Wheel Assembly', '$89.50')">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="part-card">
+        <img src="https://cdn11.bigcommerce.com/s-8t8wm3ppmz/images/stencil/1280w/products/190214/56278/carrier-hd52az002-condenser-fan-motor__48126.1696903650.jpg" alt="Condenser Fan Motor" class="part-img">
+        <div class="part-info">
+          <h3 class="part-title">Condenser Fan Motor 1/4 HP</h3>
+          <p class="part-price">$119.00</p>
+          <p class="part-stock">In stock: 35</p>
+          <button onclick="addToCart('Condenser Fan Motor 1/4 HP', '$119.00')">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="part-card">
+        <img src="https://cdn.partshnc.com/media/magefan_blog/How_to_Replace_a_Dual_Venturi_Motor_in_a_Navien_Water_Heater-PartsHnC_1.png" alt="Venturi Motor" class="part-img">
+        <div class="part-info">
+          <h3 class="part-title">Dual Venturi Motor Kit</h3>
+          <p class="part-price">$199.99</p>
+          <p class="part-stock">In stock: 12</p>
+          <button onclick="addToCart('Dual Venturi Motor Kit', '$199.99')">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="part-card">
+        <div class="part-img" style="display:flex;align-items:center;justify-content:center;font-size:3rem;color:#ccc;">Capacitor</div>
+        <div class="part-info">
+          <h3 class="part-title">Run Capacitor 45+5 MFD</h3>
+          <p class="part-price">$18.75</p>
+          <p class="part-stock">In stock: 120</p>
+          <button onclick="addToCart('Run Capacitor 45+5 MFD', '$18.75')">Add to Cart</button>
+        </div>
+      </div>
+
+      <!-- Add more parts here as needed -->
+
     </div>
+  </section>
 
-    <div style="margin-bottom: 1.2rem;">
-      <label for="user_email" style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #003366;">Your Email *</label>
-      <input type="email" id="user_email" required placeholder="yourname@gmail.com" style="width: 100%; padding: 0.9rem; border: 1px solid #ccc; border-radius: 6px;">
-    </div>
+  <!-- Order Form -->
+  <section style="margin: 3rem auto; max-width: 600px; padding: 0 1rem;">
+    <h2 style="text-align: center; color: #003366;">Request Quote or Order Parts</h2>
+    <form id="order-form" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.12);">
+      <div style="margin-bottom: 1.2rem;">
+        <label for="user_name" style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #003366;">Your Name *</label>
+        <input type="text" id="user_name" required placeholder="Jeffery W Lee" style="width: 100%; padding: 0.9rem; border: 1px solid #ccc; border-radius: 6px;">
+      </div>
 
-    <div style="margin-bottom: 1.2rem;">
-      <label for="user_phone" style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #003366;">Phone Number</label>
-      <input type="tel" id="user_phone" placeholder="(409) 749-0650" style="width: 100%; padding: 0.9rem; border: 1px solid #ccc; border-radius: 6px;">
-    </div>
+      <div style="margin-bottom: 1.2rem;">
+        <label for="user_email" style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #003366;">Your Email *</label>
+        <input type="email" id="user_email" required placeholder="yourname@gmail.com" style="width: 100%; padding: 0.9rem; border: 1px solid #ccc; border-radius: 6px;">
+      </div>
 
-    <div style="margin-bottom: 1.2rem;">
-      <label for="message" style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #003366;">Parts, Quantities & Notes *</label>
-      <textarea id="message" rows="5" required placeholder="Examples:&#10;- Run Capacitor 45+5 MFD – Qty 5&#10;- Blower Wheel Assembly – Qty 1&#10;Any notes or questions?" style="width: 100%; padding: 0.9rem; border: 1px solid #ccc; border-radius: 6px; resize: vertical;"></textarea>
-    </div>
+      <div style="margin-bottom: 1.2rem;">
+        <label for="user_phone" style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #003366;">Phone Number</label>
+        <input type="tel" id="user_phone" placeholder="(409) 749-0650" style="width: 100%; padding: 0.9rem; border: 1px solid #ccc; border-radius: 6px;">
+      </div>
 
-    <button type="submit" style="background: #003366; color: white; border: none; width: 100%; padding: 1.1rem; font-size: 1.15rem; font-weight: bold; cursor: pointer; border-radius: 8px;">
-      Send Request
-    </button>
+      <div style="margin-bottom: 1.2rem;">
+        <label for="message" style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #003366;">Parts, Quantities & Notes *</label>
+        <textarea id="message" rows="6" required placeholder="Cart items will appear here when sending from cart.\nAdd extra notes below." style="width: 100%; padding: 0.9rem; border: 1px solid #ccc; border-radius: 6px; resize: vertical;"></textarea>
+      </div>
 
-    <div id="form-message" style="margin-top: 1.5rem; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 500; display: none;"></div>
-  </form>
-</section>
+      <button type="submit" style="background: #003366; color: white; border: none; width: 100%; padding: 1.1rem; font-size: 1.15rem; font-weight: bold; cursor: pointer; border-radius: 8px;">
+        Send Request
+      </button>
 
-<!-- EmailJS Sending Logic -->
+      <div id="form-message" style="margin-top: 1.5rem; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 500; display: none;"></div>
+    </form>
+  </section>
+
+</div>
+
+<!-- Cart Icon & Modal -->
+<div id="cart-icon">
+  🛒
+  <span id="cart-count">0</span>
+</div>
+
+<div id="cart-modal">
+  <div id="cart-content">
+    <h2 style="text-align:center; color:#003366; margin-top:0;">Your Cart</h2>
+    <div id="cart-items"></div>
+    <p id="cart-empty" style="text-align:center; color:#777; padding:2rem 0; display:none;">Your cart is empty.</p>
+    <button id="close-cart" style="margin-top:1rem; background:#ccc; color:#333; padding:1rem; border:none; width:100%; border-radius:8px; cursor:pointer;">Close</button>
+    <button id="send-cart" style="margin-top:1rem; background:#003366; color:white; padding:1rem; border:none; width:100%; border-radius:8px; cursor:pointer; font-weight:bold;">Send Cart as Order Request</button>
+  </div>
+</div>
+
+<!-- JavaScript -->
 <script>
-// Your credentials
-const SERVICE_ID   = 'service_szh4rp4';
-const TEMPLATE_ID  = 'template_q307076';    // ← FIXED: lowercase + correct format
-const PUBLIC_KEY   = 'HLJ_hayCPy6htDbpu';
+// Cart logic
+let cart = [];
 
-emailjs.init(PUBLIC_KEY);
+const cartIcon = document.getElementById('cart-icon');
+const cartModal = document.getElementById('cart-modal');
+const cartItemsDiv = document.getElementById('cart-items');
+const cartEmpty = document.getElementById('cart-empty');
+const cartCount = document.getElementById('cart-count');
+const closeCart = document.getElementById('close-cart');
+const sendCartBtn = document.getElementById('send-cart');
+const messageTextarea = document.getElementById('message');
+
+function updateCartCount() {
+  const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+  cartCount.textContent = total;
+}
+
+function updateCartDisplay() {
+  cartItemsDiv.innerHTML = '';
+  if (cart.length === 0) {
+    cartEmpty.style.display = 'block';
+    sendCartBtn.style.display = 'none';
+    return;
+  }
+  cartEmpty.style.display = 'none';
+  sendCartBtn.style.display = 'block';
+
+  cart.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'cart-item';
+    div.innerHTML = `<span>${item.name} × ${item.quantity}</span><span>${item.price}</span>`;
+    cartItemsDiv.appendChild(div);
+  });
+}
+
+cartIcon.addEventListener('click', () => {
+  updateCartDisplay();
+  cartModal.style.display = 'flex';
+});
+
+closeCart.addEventListener('click', () => cartModal.style.display = 'none');
+cartModal.addEventListener('click', e => {
+  if (e.target === cartModal) cartModal.style.display = 'none';
+});
+
+sendCartBtn.addEventListener('click', () => {
+  if (cart.length === 0) return;
+
+  const cartText = cart.map(item => `- ${item.name} – Qty ${item.quantity} (${item.price})`).join('\n');
+  if (messageTextarea) {
+    messageTextarea.value = `Cart contents:\n${cartText}\n\nExtra notes:\n`;
+    messageTextarea.focus();
+    document.getElementById('order-form').scrollIntoView({ behavior: 'smooth' });
+    cartModal.style.display = 'none';
+    alert('Cart items added to order form – complete details and send!');
+  } else {
+    alert('Order form not found. Cart:\n' + cartText);
+  }
+});
+
+function addToCart(partName, price = '—') {
+  const existing = cart.find(item => item.name === partName);
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    cart.push({ name: partName, quantity: 1, price });
+  }
+  updateCartCount();
+}
+
+// EmailJS
+emailjs.init('HLJ_hayCPy6htDbpu');
 
 document.getElementById('order-form').addEventListener('submit', function(e) {
   e.preventDefault();
@@ -65,21 +374,23 @@ document.getElementById('order-form').addEventListener('submit', function(e) {
     timestamp:   new Date().toLocaleString()
   };
 
-  console.log('Sending:', params);
-
-  emailjs.send(SERVICE_ID, TEMPLATE_ID, params)
-    .then((response) => {
-      console.log('Success:', response.status);
+  emailjs.send('service_szh4rp4', 'template_q307076', params)
+    .then(() => {
       status.style.background = '#d4edda';
       status.style.color = '#155724';
-      status.textContent = 'Sent successfully! Check inbox/spam.';
+      status.textContent = 'Request sent! Check your inbox/spam.';
       e.target.reset();
+      cart = []; // Optional: clear cart after send
+      updateCartCount();
     })
     .catch((err) => {
-      console.error('Error:', err);
+      console.error('EmailJS error:', err);
       status.style.background = '#f8d7da';
       status.style.color = '#721c24';
-      status.innerHTML = 'Failed.<br>Error: ' + (err.text || err.message || 'Check console') + '<br>Call (409) 749-0650 if needed.';
+      status.innerHTML = 'Failed.<br>Error: ' + (err.text || 'See console') + '<br>Call (409) 749-0650.';
     });
 });
 </script>
+
+</body>
+</html>
